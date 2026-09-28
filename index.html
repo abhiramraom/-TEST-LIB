@@ -1,0 +1,2640 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Personal Library Management System</title>
+
+  <!-- QuaggaJS Fallback Engine -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
+  <style>
+
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
+
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+    h1, h2 { color: #333; margin: 0; }
+
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+
+    input, select, button { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+
+    button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+
+    button:hover { background-color: #218838; }
+
+    button:disabled { background-color: #a5d6a7 !important; color: #ffffff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 0.6; }
+
+
+
+    .btn-admin { background-color: #007bff; width: auto; padding: 8px 16px; }
+
+    .btn-logout { background-color: #6c757d; width: auto; padding: 8px 16px; }
+
+    .btn-feature { background-color: #17a2b8; width: auto; padding: 8px 14px; margin-left: 5px; color: white; }
+
+    .btn-feature:hover { background-color: #138496; }
+
+    
+
+    .commentary-box { grid-column: 1 / -1; background: #eef2f7; padding: 12px; border-radius: 6px; border: 1px solid #d0d7de; }
+
+    .commentary-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+
+    .commentary-row input { flex: 1; }
+
+    .btn-remove { background: #dc3545; width: auto; padding: 6px 12px; }
+
+    .btn-add { background: #17a2b8; margin-top: 5px; width: auto; padding: 6px 12px; }
+
+    
+
+    .btn-edit { background-color: #ffc107; color: #000; padding: 4px 8px; margin-right: 5px; width: auto; }
+
+    .btn-delete { background-color: #dc3545; color: #fff; padding: 4px 8px; width: auto; }
+
+    
+
+    .toolbar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+
+    #searchBox { flex: 1; padding: 10px; font-size: 16px; min-width: 250px; }
+
+    
+
+    table { width: 100%; border-collapse: collapse; background: white; }
+
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; vertical-align: middle; }
+
+    th { background-color: #007bff; color: white; }
+
+    tr:nth-child(even) { background-color: #f9f9f9; }
+
+    
+
+    input:disabled { background-color: #e9ecef; cursor: not-allowed; }
+
+
+
+    .autocomplete-wrapper { position: relative; width: 100%; }
+
+    .suggestions-box {
+
+      position: absolute;
+
+      top: 100%;
+
+      left: 0;
+
+      right: 0;
+
+      background: #ffffff;
+
+      border: 1px solid #007bff;
+
+      border-radius: 0 0 6px 6px;
+
+      max-height: 220px;
+
+      overflow-y: auto;
+
+      z-index: 1000;
+
+      display: none;
+
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+
+    }
+
+    .suggestion-item {
+
+      padding: 10px;
+
+      cursor: pointer;
+
+      border-bottom: 1px solid #eee;
+
+      font-size: 13px;
+
+    }
+
+    .suggestion-item:hover,
+
+    .suggestion-item.active { 
+
+      background-color: #007bff;
+
+      color: #ffffff;
+
+    }
+
+    
+
+    .loading-spinner { font-weight: bold; color: #007bff; padding: 15px; text-align: center; }
+
+
+
+    /* Scanner Overlay Modal */
+
+    #scannerModal {
+
+      display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+
+      background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; flex-direction: column;
+
+    }
+
+    .scanner-content {
+
+      background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 500px; width: 90%;
+
+    }
+
+    #interactive.viewport, #nativeVideoWrapper {
+
+      width: 100%; height: 280px; position: relative; overflow: hidden; background: #000; border-radius: 4px;
+
+    }
+
+    #interactive.viewport canvas, #interactive.viewport video, #nativeVideo {
+
+      width: 100%; height: 100%; object-fit: cover;
+
+    }
+
+    .scanner-status { margin-top: 10px; font-weight: bold; color: #007bff; font-size: 14px; }
+
+
+
+    /* Print Styles */
+
+    @media print {
+
+      body { background-color: white; margin: 0; }
+
+      .header-bar, .card:first-of-type, .toolbar, .btn-edit, .btn-delete, th:last-child, td:last-child {
+
+        display: none !important;
+
+      }
+
+      .card { box-shadow: none; padding: 0; }
+
+      table { border: 1px solid #000; }
+
+      th, td { border: 1px solid #000; font-size: 11px; }
+
+      th { background-color: #eee !important; color: #000 !important; }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+
+
+  <div class="header-bar">
+
+    <h1>📚 Library Management System</h1>
+
+    <div>
+
+      <span id="roleBadge" style="margin-right: 10px; font-weight: bold; color: #555;">Role: Standard User</span>
+
+      <button id="adminLoginBtn" class="btn-admin" onclick="toggleAdminLogin()">🔐 Admin Login</button>
+
+      <button id="adminLogoutBtn" class="btn-logout" onclick="logoutAdmin()" style="display:none;">🔒 Logout Admin</button>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="card" id="bookFormCard">
+
+    <h2 id="formTitle">Add New Book Entry</h2>
+
+    <form id="addBookForm" autocomplete="off">
+
+      <input type="hidden" id="editRowIndex" value="">
+
+      <div class="form-grid">
+
+        <input type="text" id="slNo" placeholder="Sl. No (Auto-generated)" disabled>
+
+        
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="title" data-col="1" data-autocomplete="true" placeholder="Title (Original)" required>
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="titleEng" data-col="2" data-autocomplete="true" placeholder="Title (English)">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="subTitle" data-col="3" data-autocomplete="true" placeholder="Sub-title">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="author" data-col="4" data-autocomplete="true" placeholder="Author & CoAuthor">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="editor" data-col="5" data-autocomplete="true" placeholder="Editor & Co-Editor">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="lang" data-col="7" data-autocomplete="true" placeholder="Language">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="vol" data-col="8" data-autocomplete="true" placeholder="Vol (IF)">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="publisher" data-col="9" data-autocomplete="true" placeholder="Publisher">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="year" data-col="10" data-autocomplete="true" placeholder="Year of Print">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <!-- ISBN Barcode Scanner -->
+
+        <div class="autocomplete-wrapper" style="display: flex; gap: 5px;">
+
+          <input type="text" id="isbn" data-col="11" data-autocomplete="true" placeholder="ISBN (Scan or Type)" onchange="fetchMetadataByISBN(this.value)">
+
+          <button type="button" class="btn-feature" title="Scan Barcode via Camera" onclick="openBarcodeScanner()">📷 Scan</button>
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="topic" data-col="12" data-autocomplete="true" placeholder="Topic">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <div class="autocomplete-wrapper">
+
+          <input type="text" id="subject" data-col="13" data-autocomplete="true" placeholder="Subject">
+
+          <div class="suggestions-box"></div>
+
+        </div>
+
+
+
+        <select id="condition" required>
+
+          <option value="" disabled selected>Select Condition...</option>
+
+          <option value="A">A</option>
+
+          <option value="B">B</option>
+
+          <option value="C">C</option>
+
+        </select>
+
+
+
+        <div class="commentary-box">
+
+          <label><strong>Commentaries & Their Authors:</strong></label>
+
+          <div id="commentaryContainer" style="margin-top: 8px;"></div>
+
+          <button type="button" class="btn-add" onclick="addCommentaryRow()">+ Add Commentary & Author</button>
+
+        </div>
+
+      </div>
+
+      <br>
+
+      <button type="submit" id="submitBtn">Add Book to Library</button>
+
+      <button type="button" id="cancelBtn" onclick="resetForm()" style="background-color: #6c757d; display: none; margin-top: 5px;">Cancel Editing</button>
+
+    </form>
+
+  </div>
+
+
+
+  <div class="card">
+
+    <h2>Book Catalogue</h2>
+
+    <div class="toolbar">
+
+      <input type="text" id="searchBox" onkeyup="searchBooks()" placeholder="🔍 Search by Title, Author, Subject, etc...">
+
+      <button type="button" class="btn-feature" onclick="exportToCSV()">📥 Export CSV</button>
+
+      <button type="button" class="btn-feature" onclick="window.print()">🖨️ Print / PDF</button>
+
+    </div>
+
+
+
+    <div style="overflow-x:auto;">
+
+      <div id="loadingIndicator" class="loading-spinner">⏳ Fetching library records, please wait...</div>
+
+      <table id="booksTable" style="display:none;">
+
+        <thead>
+
+          <tr id="tableHead"></tr>
+
+        </thead>
+
+        <tbody id="tableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- Camera Scanner Modal -->
+
+  <div id="scannerModal">
+
+    <div class="scanner-content">
+
+      <h3 style="margin-top:0;">Position ISBN Barcode in View</h3>
+
+      
+
+      <div id="nativeVideoWrapper" style="display:none;">
+
+        <video id="nativeVideo" autoplay playsinline></video>
+
+      </div>
+
+      <div id="interactive" class="viewport" style="display:none;"></div>
+
+
+
+      <div id="scannerStatus" class="scanner-status">Initializing Camera...</div>
+
+      <br>
+
+      <button type="button" class="btn-remove" onclick="closeBarcodeScanner()">Close Scanner</button>
+
+    </div>
+
+  </div>
+
+
+
+<script>
+
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0KIegShqsQuyI6IzGdt8QPwLTEI9xFk3m2UiNUUSu3SNlXsKvIsmLZVGWU1HuGaMDzg/exec';
+
+  
+
+  let adminToken = null;
+
+  let globalData = [];
+
+  let selectedIndex = -1;
+
+  let isSubmitting = false;
+
+
+
+  // Scanner Variables
+
+  let nativeStream = null;
+
+  let nativeScanInterval = null;
+
+
+
+  window.onload = function() {
+
+    addCommentaryRow();
+
+    fetchBooks();
+
+    setupGlobalAutocomplete();
+
+  };
+
+
+
+  function toggleAdminLogin() {
+
+    const pwd = prompt("Enter Admin Password:");
+
+    if (!pwd) return;
+
+
+
+    fetch(SCRIPT_URL, {
+
+      method: 'POST',
+
+      body: JSON.stringify({ action: 'login', password: pwd })
+
+    })
+
+    .then(res => res.json())
+
+    .then(res => {
+
+      if (res.success) {
+
+        adminToken = res.token;
+
+        alert("Admin mode activated!");
+
+        updateAdminUI(true);
+
+      } else {
+
+        alert("Incorrect Password!");
+
+      }
+
+    })
+
+    .catch(err => alert("Connection error: " + err));
+
+  }
+
+
+
+  function logoutAdmin() {
+
+    adminToken = null;
+
+    alert("Logged out of Admin mode.");
+
+    updateAdminUI(false);
+
+    resetForm();
+
+  }
+
+
+
+  function updateAdminUI(isAdmin) {
+
+    document.getElementById('roleBadge').innerText = isAdmin ? 'Role: Administrator' : 'Role: Standard User';
+
+    document.getElementById('adminLoginBtn').style.display = isAdmin ? 'none' : 'inline-block';
+
+    document.getElementById('adminLogoutBtn').style.display = isAdmin ? 'inline-block' : 'none';
+
+    fetchBooks();
+
+  }
+
+
+
+  function addCommentaryRow(name, author) {
+
+    name = name || '';
+
+    author = author || '';
+
+    const container = document.getElementById('commentaryContainer');
+
+    const div = document.createElement('div');
+
+    div.className = 'commentary-row';
+
+    div.innerHTML = '<input type="text" class="comm-name" placeholder="Commentary Title" value="' + name + '">' +
+
+                    '<input type="text" class="comm-author" placeholder="Author of Commentary" value="' + author + '">' +
+
+                    '<button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>';
+
+    container.appendChild(div);
+
+  }
+
+
+
+  function getLinkedCommentaries() {
+
+    const names = document.querySelectorAll('.comm-name');
+
+    const authors = document.querySelectorAll('.comm-author');
+
+    let result = [];
+
+    names.forEach((elem, idx) => {
+
+      const commName = elem.value.trim();
+
+      const commAuthor = authors[idx].value.trim();
+
+      if (commName || commAuthor) {
+
+        result.push((commName || 'Untitled') + ' (Author: ' + (commAuthor || 'Unknown') + ')');
+
+      }
+
+    });
+
+    return result.join(' | ');
+
+  }
+
+
+
+  function fetchBooks() {
+
+    const loading = document.getElementById('loadingIndicator');
+
+    const table = document.getElementById('booksTable');
+
+    loading.style.display = 'block';
+
+    table.style.display = 'none';
+
+
+
+    fetch(SCRIPT_URL)
+
+      .then(res => res.json())
+
+      .then(data => {
+
+        globalData = data;
+
+        const head = document.getElementById('tableHead');
+
+        const body = document.getElementById('tableBody');
+
+
+
+        if (data && data.length > 0) {
+
+          let headHtml = '';
+
+          data[0].forEach(col => { headHtml += '<th>' + col + '</th>'; });
+
+          if (adminToken) { headHtml += '<th>Actions</th>'; }
+
+          head.innerHTML = headHtml;
+
+
+
+          let bodyHtml = '';
+
+          for (let i = 1; i < data.length; i++) {
+
+            bodyHtml += '<tr>';
+
+            data[i].forEach(cell => {
+
+              bodyHtml += '<td>' + (cell !== undefined ? cell : '') + '</td>';
+
+            });
+
+
+
+            if (adminToken) {
+
+              bodyHtml += '<td>' +
+
+                '<button class="btn-edit" onclick="editBook(' + i + ')">Edit</button>' +
+
+                '<button class="btn-delete" onclick="deleteBook(' + (i + 1) + ')">Delete</button>' +
+
+              '</td>';
+
+            }
+
+            bodyHtml += '</tr>';
+
+          }
+
+          body.innerHTML = bodyHtml;
+
+        }
+
+
+
+        loading.style.display = 'none';
+
+        table.style.display = 'table';
+
+      })
+
+      .catch(err => {
+
+        loading.innerText = "⚠️ Failed to load catalog. Refresh page.";
+
+        console.error("Error fetching books:", err);
+
+      });
+
+  }
+
+
+
+  /* --- ISBN AUTO-METADATA LOOKUP (Open Library API) --- */
+
+  function fetchMetadataByISBN(isbnRaw) {
+
+    const isbn = isbnRaw.replace(/[^0-9X]/gi, '');
+
+    if (!isbn || (isbn.length !== 10 && isbn.length !== 13)) return;
+
+
+
+    const submitBtn = document.getElementById('submitBtn');
+
+    submitBtn.innerText = "⏳ Fetching Book Details from Open Library...";
+
+
+
+    fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`)
+
+      .then(res => res.json())
+
+      .then(data => {
+
+        const bookKey = `ISBN:${isbn}`;
+
+        if (data && data[bookKey]) {
+
+          const book = data[bookKey];
+
+          if (!document.getElementById('title').value) document.getElementById('title').value = book.title || '';
+
+          if (!document.getElementById('author').value && book.authors) {
+
+            document.getElementById('author').value = book.authors.map(a => a.name).join(', ');
+
+          }
+
+          if (!document.getElementById('publisher').value && book.publishers) {
+
+            document.getElementById('publisher').value = book.publishers.map(p => p.name).join(', ');
+
+          }
+
+          if (!document.getElementById('year').value && book.publish_date) {
+
+            document.getElementById('year').value = book.publish_date;
+
+          }
+
+          if (!document.getElementById('subTitle').value && book.subtitle) {
+
+            document.getElementById('subTitle').value = book.subtitle;
+
+          }
+
+        }
+
+      })
+
+      .catch(err => console.warn("ISBN Fetch error:", err))
+
+      .finally(() => {
+
+        const editRowIndex = document.getElementById('editRowIndex').value;
+
+        submitBtn.innerText = editRowIndex ? 'Update Book Info' : 'Add Book to Library';
+
+      });
+
+  }
+
+
+
+  /* --- HYBRID BARCODE SCANNER ENGINE (Native + Strict Fallback) --- */
+
+  function openBarcodeScanner() {
+
+    document.getElementById('scannerModal').style.display = 'flex';
+
+    document.getElementById('scannerStatus').innerText = "Starting camera...";
+
+
+
+    if ('BarcodeDetector' in window) {
+
+      startNativeScanner();
+
+    } else {
+
+      startStrictQuaggaScanner();
+
+    }
+
+  }
+
+
+
+  function handleSuccessfulScan(rawCode) {
+
+    const code = rawCode.trim();
+
+    // Validate EAN-13 ISBN prefixes (978 / 979) or valid 10-digit ISBN
+
+    if ((code.startsWith("978") || code.startsWith("979")) && code.length === 13) {
+
+      document.getElementById('isbn').value = code;
+
+      fetchMetadataByISBN(code);
+
+      closeBarcodeScanner();
+
+    } else if (code.length === 10) {
+
+      document.getElementById('isbn').value = code;
+
+      fetchMetadataByISBN(code);
+
+      closeBarcodeScanner();
+
+    } else {
+
+      document.getElementById('scannerStatus').innerText = `⚠️ Scanned non-ISBN barcode (${code}). Try again.`;
+
+    }
+
+  }
+
+
+
+  /* 1. NATIVE BROWSER DETECTOR (Chrome/Edge/Android) */
+
+  async function startNativeScanner() {
+
+    document.getElementById('nativeVideoWrapper').style.display = 'block';
+
+    document.getElementById('interactive').style.display = 'none';
+
+    const video = document.getElementById('nativeVideo');
+
+
+
+    try {
+
+      nativeStream = await navigator.mediaDevices.getUserMedia({
+
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+
+      });
+
+      video.srcObject = nativeStream;
+
+
+
+      const barcodeDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8'] });
+
+      document.getElementById('scannerStatus').innerText = "Native Detector Ready. Align barcode...";
+
+
+
+      nativeScanInterval = setInterval(async () => {
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+
+          try {
+
+            const barcodes = await barcodeDetector.detect(video);
+
+            if (barcodes.length > 0) {
+
+              handleSuccessfulScan(barcodes[0].rawValue);
+
+            }
+
+          } catch (e) { console.error(e); }
+
+        }
+
+      }, 200);
+
+
+
+    } catch (err) {
+
+      console.warn("Native camera failed, falling back to engine:", err);
+
+      startStrictQuaggaScanner();
+
+    }
+
+  }
+
+
+
+  /* 2. STRICT QUAGGA FALLBACK ENGINE (Safari / Firefox) */
+
+  function startStrictQuaggaScanner() {
+
+    document.getElementById('nativeVideoWrapper').style.display = 'none';
+
+    document.getElementById('interactive').style.display = 'block';
+
+    document.getElementById('scannerStatus').innerText = "Align ISBN Barcode inside window...";
+
+
+
+    Quagga.init({
+
+      inputStream: {
+
+        name: "Live",
+
+        type: "LiveStream",
+
+        target: document.querySelector('#interactive'),
+
+        constraints: { facingMode: "environment", focusMode: "continuous" }
+
+      },
+
+      // Restrict strictly to EAN-13 to prevent misreads
+
+      decoder: { readers: ["ean_reader"], multiple: false },
+
+      locate: true
+
+    }, function(err) {
+
+      if (err) {
+
+        alert("Camera permission denied or unavailable.");
+
+        closeBarcodeScanner();
+
+        return;
+
+      }
+
+      Quagga.start();
+
+    });
+
+
+
+    let lastCode = "";
+
+    let matchCount = 0;
+
+
+
+    Quagga.onDetected(function(result) {
+
+      if (result && result.codeResult && result.codeResult.code) {
+
+        const code = result.codeResult.code;
+
+
+
+        // Verify checked length and ISBN prefixes
+
+        if ((code.startsWith("978") || code.startsWith("979")) && code.length === 13) {
+
+          if (code === lastCode) {
+
+            matchCount++;
+
+          } else {
+
+            lastCode = code;
+
+            matchCount = 1;
+
+          }
+
+
+
+          // Require 3 consecutive identical reads to guarantee 100% accuracy
+
+          if (matchCount >= 3) {
+
+            handleSuccessfulScan(code);
+
+          }
+
+        }
+
+      }
+
+    });
+
+  }
+
+
+
+  function closeBarcodeScanner() {
+
+    if (nativeScanInterval) clearInterval(nativeScanInterval);
+
+    if (nativeStream) {
+
+      nativeStream.getTracks().forEach(track => track.stop());
+
+      nativeStream = null;
+
+    }
+
+    try { Quagga.stop(); } catch(e){}
+
+
+
+    document.getElementById('scannerModal').style.display = 'none';
+
+    document.getElementById('nativeVideoWrapper').style.display = 'none';
+
+    document.getElementById('interactive').style.display = 'none';
+
+  }
+
+
+
+  /* --- EXPORT CSV --- */
+
+  function exportToCSV() {
+
+    if (!globalData || globalData.length === 0) {
+
+      alert("No data to export.");
+
+      return;
+
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+
+    globalData.forEach(row => {
+
+      const escapedRow = row.map(cell => `"${(cell !== undefined ? cell : '').toString().replace(/"/g, '""')}"`);
+
+      csvContent += escapedRow.join(",") + "\r\n";
+
+    });
+
+    
+
+    const encodedUri = encodeURI(csvContent);
+
+    const link = document.createElement("a");
+
+    link.setAttribute("href", encodedUri);
+
+    link.setAttribute("download", `Library_Catalog_${new Date().toISOString().slice(0,10)}.csv`);
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+  }
+
+
+
+  /* --- AUTOCOMPLETE ENGINE --- */
+
+  function setupGlobalAutocomplete() {
+
+    document.querySelectorAll('input[data-autocomplete="true"]').forEach(input => {
+
+      input.addEventListener('input', function() { handleFieldInput(this); });
+
+      input.addEventListener('keydown', function(e) { handleFieldKeyDown(e, this); });
+
+    });
+
+  }
+
+
+
+  function handleFieldInput(inputElem) {
+
+    const wrapper = inputElem.closest('.autocomplete-wrapper');
+
+    const box = wrapper.querySelector('.suggestions-box');
+
+    const query = inputElem.value.trim().toLowerCase();
+
+    const targetCol = parseInt(inputElem.dataset.col);
+
+    selectedIndex = -1;
+
+
+
+    closeAllSuggestions();
+
+
+
+    if (!query || !globalData || globalData.length <= 1) return;
+
+
+
+    const matches = new Set();
+
+    for (let i = 1; i < globalData.length; i++) {
+
+      const fieldValue = String(globalData[i][targetCol] || '').trim();
+
+      if (fieldValue && fieldValue.toLowerCase().includes(query)) {
+
+        matches.add(fieldValue);
+
+        if (matches.size >= 8) break;
+
+      }
+
+    }
+
+
+
+    if (matches.size === 0) return;
+
+
+
+    box.innerHTML = '';
+
+    matches.forEach(value => {
+
+      const item = document.createElement('div');
+
+      item.className = 'suggestion-item';
+
+      item.innerHTML = `<strong>${value}</strong>`;
+
+      item.dataset.value = value;
+
+
+
+      item.onmousedown = function(e) {
+
+        e.preventDefault();
+
+        inputElem.value = value;
+
+        closeAllSuggestions();
+
+      };
+
+      box.appendChild(item);
+
+    });
+
+
+
+    box.style.display = 'block';
+
+  }
+
+
+
+  function handleFieldKeyDown(e, inputElem) {
+
+    const wrapper = inputElem.closest('.autocomplete-wrapper');
+
+    const box = wrapper.querySelector('.suggestions-box');
+
+    const items = box.querySelectorAll('.suggestion-item');
+
+
+
+    if (box.style.display === 'none' || items.length === 0) return;
+
+
+
+    if (e.key === 'ArrowDown') {
+
+      e.preventDefault();
+
+      selectedIndex = (selectedIndex + 1) % items.length;
+
+      updateActiveItem(items);
+
+    } else if (e.key === 'ArrowUp') {
+
+      e.preventDefault();
+
+      selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+
+      updateActiveItem(items);
+
+    } else if (e.key === 'Enter') {
+
+      if (selectedIndex >= 0 && selectedIndex < items.length) {
+
+        e.preventDefault();
+
+        inputElem.value = items[selectedIndex].dataset.value;
+
+        closeAllSuggestions();
+
+      }
+
+    } else if (e.key === 'Escape') {
+
+      closeAllSuggestions();
+
+    }
+
+  }
+
+
+
+  function updateActiveItem(items) {
+
+    items.forEach((item, idx) => {
+
+      if (idx === selectedIndex) {
+
+        item.classList.add('active');
+
+        item.scrollIntoView({ block: 'nearest' });
+
+      } else {
+
+        item.classList.remove('active');
+
+      }
+
+    });
+
+  }
+
+
+
+  function closeAllSuggestions() {
+
+    document.querySelectorAll('.suggestions-box').forEach(box => { box.style.display = 'none'; });
+
+    selectedIndex = -1;
+
+  }
+
+
+
+  function populateFormFields(row) {
+
+    document.getElementById('title').value = row[1] || '';
+
+    document.getElementById('titleEng').value = row[2] || '';
+
+    document.getElementById('subTitle').value = row[3] || '';
+
+    document.getElementById('author').value = row[4] || '';
+
+    document.getElementById('editor').value = row[5] || '';
+
+
+
+    document.getElementById('commentaryContainer').innerHTML = '';
+
+    const commString = row[6] || '';
+
+    if (commString) {
+
+      const pairs = commString.split(' | ');
+
+      pairs.forEach(pair => {
+
+        const match = pair.match(/(.*) \(Author: (.*)\)/);
+
+        if (match) {
+
+          addCommentaryRow(match[1], match[2]);
+
+        } else {
+
+          addCommentaryRow(pair, '');
+
+        }
+
+      });
+
+    } else {
+
+      addCommentaryRow();
+
+    }
+
+
+
+    document.getElementById('lang').value = row[7] || '';
+
+    document.getElementById('vol').value = row[8] || '';
+
+    document.getElementById('publisher').value = row[9] || '';
+
+    document.getElementById('year').value = row[10] || '';
+
+    document.getElementById('isbn').value = row[11] || '';
+
+    document.getElementById('topic').value = row[12] || '';
+
+    document.getElementById('subject').value = row[13] || '';
+
+    document.getElementById('condition').value = row[14] || '';
+
+  }
+
+
+
+  document.addEventListener('click', function(e) {
+
+    if (!e.target.closest('.autocomplete-wrapper')) closeAllSuggestions();
+
+  });
+
+
+
+  document.getElementById('addBookForm').addEventListener('submit', function(e) {
+
+    e.preventDefault();
+
+    if (isSubmitting) return false;
+
+
+
+    const editRowIndex = document.getElementById('editRowIndex').value;
+
+    if (editRowIndex && !adminToken) {
+
+      alert("Only administrators can edit entries.");
+
+      return;
+
+    }
+
+
+
+    isSubmitting = true;
+
+    const submitBtn = document.getElementById('submitBtn');
+
+    const originalText = submitBtn.innerText;
+
+
+
+    submitBtn.disabled = true;
+
+    submitBtn.innerText = editRowIndex ? "⏳ Updating..." : "⏳ Saving...";
+
+
+
+    const formData = {
+
+      slNo: document.getElementById('slNo').value,
+
+      title: document.getElementById('title').value,
+
+      titleEng: document.getElementById('titleEng').value,
+
+      subTitle: document.getElementById('subTitle').value,
+
+      author: document.getElementById('author').value,
+
+      editor: document.getElementById('editor').value,
+
+      commentariesLinked: getLinkedCommentaries(),
+
+      lang: document.getElementById('lang').value,
+
+      vol: document.getElementById('vol').value,
+
+      publisher: document.getElementById('publisher').value,
+
+      year: document.getElementById('year').value,
+
+      isbn: document.getElementById('isbn').value,
+
+      topic: document.getElementById('topic').value,
+
+      subject: document.getElementById('subject').value,
+
+      condition: document.getElementById('condition').value
+
+    };
+
+
+
+    const payload = {
+
+      action: editRowIndex ? "update" : "add",
+
+      adminToken: adminToken,
+
+      rowIndex: editRowIndex ? parseInt(editRowIndex) + 1 : null,
+
+      data: formData
+
+    };
+
+
+
+    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+
+    .then(res => res.json())
+
+    .then(res => {
+
+      if (res.success) {
+
+        alert(editRowIndex ? 'Book updated!' : 'Book added!');
+
+        resetForm();
+
+        fetchBooks();
+
+      } else {
+
+        alert("Error: " + res.message);
+
+      }
+
+    })
+
+    .catch(err => alert("Submission failed: " + err))
+
+    .finally(() => {
+
+      isSubmitting = false;
+
+      submitBtn.disabled = false;
+
+      submitBtn.innerText = originalText;
+
+    });
+
+  });
+
+
+
+  function editBook(index) {
+
+    if (!adminToken) { alert("Unauthorized."); return; }
+
+    const row = globalData[index];
+
+    document.getElementById('editRowIndex').value = index;
+
+    document.getElementById('slNo').value = row[0] || '';
+
+    
+
+    populateFormFields(row);
+
+
+
+    document.getElementById('formTitle').innerText = 'Edit Book Information (Admin)';
+
+    document.getElementById('submitBtn').innerText = 'Update Book Info';
+
+    document.getElementById('cancelBtn').style.display = 'inline-block';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  }
+
+
+
+  function resetForm() {
+
+    document.getElementById('addBookForm').reset();
+
+    document.getElementById('editRowIndex').value = '';
+
+    document.getElementById('slNo').value = '';
+
+    document.getElementById('commentaryContainer').innerHTML = '';
+
+    addCommentaryRow();
+
+    document.getElementById('formTitle').innerText = 'Add New Book Entry';
+
+    document.getElementById('submitBtn').innerText = 'Add Book to Library';
+
+    document.getElementById('cancelBtn').style.display = 'none';
+
+  }
+
+
+
+  function deleteBook(rowIndex) {
+
+    if (!adminToken) { alert("Unauthorized."); return; }
+
+    if (confirm('Delete this book entry?')) {
+
+      fetch(SCRIPT_URL, {
+
+        method: 'POST',
+
+        body: JSON.stringify({ action: 'delete', adminToken: adminToken, rowIndex: rowIndex })
+
+      })
+
+      .then(res => res.json())
+
+      .then(res => {
+
+        if (res.success) {
+
+          alert('Book deleted!');
+
+          fetchBooks();
+
+        } else {
+
+          alert('Error: ' + res.message);
+
+        }
+
+      })
+
+      .catch(err => alert("Delete failed: " + err));
+
+    }
+
+  }
+
+
+
+  function searchBooks() {
+
+    const input = document.getElementById('searchBox').value.toLowerCase();
+
+    const rows = document.getElementById('tableBody').getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+
+      const text = rows[i].textContent.toLowerCase();
+
+      rows[i].style.display = text.includes(input) ? '' : 'none';
+
+    }
+
+  }
+
+</script>
+
+</body>
+
+</html> i want add user system in this software and an option to track the progress of user to follow the work for the admin.
+
+To introduce user authentication, user management, and work/progress tracking for admins, you will need to update both your Frontend Web Application (HTML/JS) and your Backend Apps Script (exec Web App).
+
+Below is the complete, upgraded code and step-by-step guidance on how to integrate the user system and progress tracking.
+
+1. Updated Google Apps Script (Code.gs)
+Replace your Google Apps Script backend code with the following implementation. It manages user roles (admin vs user), logs user activity (progress tracking), and exposes endpoints for listing users and their activity logs.
+
+JavaScript
+// --- CONFIGURATION ---
+const ADMIN_PASSWORD = "adminPassword123"; // Change this!
+const SCRIPT_PROP = PropertiesService.getScriptProperties();
+
+// Initialize or get default user DB in ScriptProperties
+function getUsers() {
+  const usersJson = SCRIPT_PROP.getProperty("USERS_DB");
+  if (!usersJson) {
+    const defaultUsers = {
+      "admin@library.org": { name: "Admin User", role: "admin", pass: "admin123" },
+      "john@library.org": { name: "John Doe", role: "user", pass: "user123" }
+    };
+    SCRIPT_PROP.setProperty("USERS_DB", JSON.stringify(defaultUsers));
+    return defaultUsers;
+  }
+  return JSON.parse(usersJson);
+}
+
+function saveUsers(users) {
+  SCRIPT_PROP.setProperty("USERS_DB", JSON.stringify(users));
+}
+
+// Log user activities for progress tracking
+function logActivity(userEmail, action, details) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let logSheet = ss.getSheetByName("ActivityLogs");
+  if (!logSheet) {
+    logSheet = ss.insertSheet("ActivityLogs");
+    logSheet.appendRow(["Timestamp", "User Email", "Action", "Details"]);
+  }
+  logSheet.appendRow([new Date(), userEmail, action, details]);
+}
+
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheets()[0];
+  const data = sheet.getDataRange().getValues();
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    const request = JSON.parse(e.postData.contents);
+    const action = request.action;
+    const users = getUsers();
+
+    // 1. User Login
+    if (action === "login") {
+      const email = request.email ? request.email.toLowerCase().trim() : "";
+      const password = request.password;
+      
+      // Legacy Password check fallback or User DB Check
+      if (users[email] && users[email].pass === password) {
+        const token = "TOKEN_" + Math.random().toString(36).substr(2) + "_" + Date.now();
+        SCRIPT_PROP.setProperty("SESSION_" + token, JSON.stringify({ email: email, role: users[email].role }));
+        
+        logActivity(email, "LOGIN", "User logged into the system");
+        
+        return responseJSON({ 
+          success: true, 
+          token: token, 
+          role: users[email].role, 
+          name: users[email].name, 
+          email: email 
+        });
+      } else if (password === ADMIN_PASSWORD) { // Fallback legacy admin login
+        const token = "TOKEN_ADMIN_" + Date.now();
+        SCRIPT_PROP.setProperty("SESSION_" + token, JSON.stringify({ email: "admin@system.local", role: "admin" }));
+        return responseJSON({ success: true, token: token, role: "admin", name: "System Admin", email: "admin@system.local" });
+      } else {
+        return responseJSON({ success: false, message: "Invalid email or password." });
+      }
+    }
+
+    // Auth Validation Helper
+    const sessionRaw = SCRIPT_PROP.getProperty("SESSION_" + request.token);
+    const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+    if (!session) {
+      return responseJSON({ success: false, message: "Unauthorized: Invalid or expired session." });
+    }
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheets()[0];
+
+    // 2. Add Book Entry
+    if (action === "add") {
+      const rowData = [
+        "=ROW()-1", // Auto Sl. No.
+        request.data.title, request.data.titleEng, request.data.subTitle,
+        request.data.author, request.data.editor, request.data.commentariesLinked,
+        request.data.lang, request.data.vol, request.data.publisher,
+        request.data.year, request.data.isbn, request.data.topic,
+        request.data.subject, request.data.condition
+      ];
+      sheet.appendRow(rowData);
+      logActivity(session.email, "ADD_BOOK", `Added book: "${request.data.title}"`);
+      return responseJSON({ success: true });
+    }
+
+    // 3. Update Book Entry
+    if (action === "update") {
+      if (session.role !== "admin") return responseJSON({ success: false, message: "Admin privileges required." });
+      const rowIdx = request.rowIndex;
+      const updatedValues = [
+        sheet.getRange(rowIdx, 1).getValue(), // Preserve existing Sl. No formula/value
+        request.data.title, request.data.titleEng, request.data.subTitle,
+        request.data.author, request.data.editor, request.data.commentariesLinked,
+        request.data.lang, request.data.vol, request.data.publisher,
+        request.data.year, request.data.isbn, request.data.topic,
+        request.data.subject, request.data.condition
+      ];
+      sheet.getRange(rowIdx, 1, 1, updatedValues.length).setValues([updatedValues]);
+      logActivity(session.email, "UPDATE_BOOK", `Updated book at row ${rowIdx}: "${request.data.title}"`);
+      return responseJSON({ success: true });
+    }
+
+    // 4. Delete Book Entry
+    if (action === "delete") {
+      if (session.role !== "admin") return responseJSON({ success: false, message: "Admin privileges required." });
+      sheet.deleteRow(request.rowIndex);
+      logActivity(session.email, "DELETE_BOOK", `Deleted book at row ${request.rowIndex}`);
+      return responseJSON({ success: true });
+    }
+
+    // 5. Admin: Get Activity Logs for Tracking Progress
+    if (action === "getLogs") {
+      if (session.role !== "admin") return responseJSON({ success: false, message: "Admin privileges required." });
+      const logSheet = ss.getSheetByName("ActivityLogs");
+      const logData = logSheet ? logSheet.getDataRange().getValues() : [];
+      return responseJSON({ success: true, logs: logData });
+    }
+
+    // 6. Admin: Get User List
+    if (action === "getUsers") {
+      if (session.role !== "admin") return responseJSON({ success: false, message: "Admin privileges required." });
+      return responseJSON({ success: true, users: users });
+    }
+
+    // 7. Admin: Register / Add User
+    if (action === "addUser") {
+      if (session.role !== "admin") return responseJSON({ success: false, message: "Admin privileges required." });
+      const newEmail = request.newUser.email.toLowerCase().trim();
+      users[newEmail] = { name: request.newUser.name, role: request.newUser.role, pass: request.newUser.password };
+      saveUsers(users);
+      logActivity(session.email, "CREATE_USER", `Created account for ${newEmail} (${request.newUser.role})`);
+      return responseJSON({ success: true });
+    }
+
+  } catch (err) {
+    return responseJSON({ success: false, message: err.toString() });
+  }
+}
+
+function responseJSON(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+2. Complete Upgraded HTML/JS Web Application
+Below is the complete HTML code. It features:
+
+Login Modal: Secure login system supporting Users and Administrators.
+
+Role-Based Controls: Standard users can submit entries and track catalog items; Admins have access to edit, delete, and manage user accounts.
+
+Admin Progress Dashboard: Admin panel with metrics and real-time activity log to track work completed by each team member.
+
+HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Library Management System</title>
+  <!-- QuaggaJS Fallback Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h1, h2, h3 { color: #333; margin: 0; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    input, select, button { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+    button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background-color: #218838; }
+    button:disabled { background-color: #a5d6a7 !important; color: #ffffff !important; cursor: not-allowed !important; pointer-events: none !important; opacity: 0.6; }
+
+    .btn-admin { background-color: #007bff; width: auto; padding: 8px 16px; }
+    .btn-logout { background-color: #6c757d; width: auto; padding: 8px 16px; }
+    .btn-feature { background-color: #17a2b8; width: auto; padding: 8px 14px; margin-left: 5px; color: white; }
+    .btn-feature:hover { background-color: #138496; }
+    
+    .commentary-box { grid-column: 1 / -1; background: #eef2f7; padding: 12px; border-radius: 6px; border: 1px solid #d0d7de; }
+    .commentary-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+    .commentary-row input { flex: 1; }
+    .btn-remove { background: #dc3545; width: auto; padding: 6px 12px; }
+    .btn-add { background: #17a2b8; margin-top: 5px; width: auto; padding: 6px 12px; }
+    
+    .btn-edit { background-color: #ffc107; color: #000; padding: 4px 8px; margin-right: 5px; width: auto; }
+    .btn-delete { background-color: #dc3545; color: #fff; padding: 4px 8px; width: auto; }
+    
+    .toolbar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+    #searchBox { flex: 1; padding: 10px; font-size: 16px; min-width: 250px; }
+    
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; vertical-align: middle; }
+    th { background-color: #007bff; color: white; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    
+    input:disabled { background-color: #e9ecef; cursor: not-allowed; }
+
+    .autocomplete-wrapper { position: relative; width: 100%; }
+    .suggestions-box {
+      position: absolute; top: 100%; left: 0; right: 0; background: #ffffff;
+      border: 1px solid #007bff; border-radius: 0 0 6px 6px; max-height: 220px;
+      overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 13px; }
+    .suggestion-item:hover, .suggestion-item.active { background-color: #007bff; color: #ffffff; }
+    
+    .loading-spinner { font-weight: bold; color: #007bff; padding: 15px; text-align: center; }
+
+    /* Scanner & Generic Modals */
+    .modal-overlay {
+      display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; flex-direction: column;
+    }
+    .modal-card { background: white; padding: 25px; border-radius: 8px; max-width: 500px; width: 90%; }
+    
+    /* Progress Dashboard Styling */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .stat-card { background: #eef2f7; padding: 15px; border-radius: 6px; text-align: center; border-left: 4px solid #007bff; }
+    .stat-number { font-size: 22px; font-weight: bold; color: #007bff; margin-top: 5px; }
+
+    /* Print Styles */
+    @media print {
+      body { background-color: white; margin: 0; }
+      .header-bar, .card:first-of-type, .toolbar, .btn-edit, .btn-delete, th:last-child, td:last-child, #adminDashboardCard {
+        display: none !important;
+      }
+      .card { box-shadow: none; padding: 0; }
+      table { border: 1px solid #000; }
+      th, td { border: 1px solid #000; font-size: 11px; }
+      th { background-color: #eee !important; color: #000 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <h1>📚 Library Management System</h1>
+    <div>
+      <span id="userInfo" style="margin-right: 10px; font-weight: bold; color: #555;">Not Logged In</span>
+      <button id="authBtn" class="btn-admin" onclick="openLoginModal()">🔑 Login</button>
+    </div>
+  </div>
+
+  <!-- Admin Progress & Activity Dashboard (Only Visible to Admin) -->
+  <div class="card" id="adminDashboardCard" style="display: none;">
+    <h2>📊 Work Progress & User Activity Tracking</h2>
+    <p style="font-size: 13px; color: #666;">Track work entries, updates, and user activity in real time.</p>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div>Total Catalog Books</div>
+        <div class="stat-number" id="statTotalBooks">0</div>
+      </div>
+      <div class="stat-card">
+        <div>Total System Logs</div>
+        <div class="stat-number" id="statTotalLogs">0</div>
+      </div>
+      <div class="stat-card">
+        <div>Active Users</div>
+        <div class="stat-number" id="statActiveUsers">0</div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <h3>User Work Logs</h3>
+      <div>
+        <button type="button" class="btn-feature" onclick="fetchAdminLogs()">🔄 Refresh Activity Logs</button>
+        <button type="button" class="btn-feature" style="background-color: #28a745;" onclick="openAddUserModal()">➕ Add New User Account</button>
+      </div>
+    </div>
+
+    <div style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User Email</th>
+            <th>Action</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="logsTableBody">
+          <tr><td colspan="4" style="text-align: center;">Click Refresh to load progress logs...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="bookFormCard">
+    <h2 id="formTitle">Add New Book Entry</h2>
+    <form id="addBookForm" autocomplete="off">
+      <input type="hidden" id="editRowIndex" value="">
+      <div class="form-grid">
+        <input type="text" id="slNo" placeholder="Sl. No (Auto-generated)" disabled>
+        
+        <div class="autocomplete-wrapper">
+          <input type="text" id="title" data-col="1" data-autocomplete="true" placeholder="Title (Original)" required>
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="titleEng" data-col="2" data-autocomplete="true" placeholder="Title (English)">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="subTitle" data-col="3" data-autocomplete="true" placeholder="Sub-title">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="author" data-col="4" data-autocomplete="true" placeholder="Author & CoAuthor">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="editor" data-col="5" data-autocomplete="true" placeholder="Editor & Co-Editor">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="lang" data-col="7" data-autocomplete="true" placeholder="Language">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="vol" data-col="8" data-autocomplete="true" placeholder="Vol (IF)">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="publisher" data-col="9" data-autocomplete="true" placeholder="Publisher">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="year" data-col="10" data-autocomplete="true" placeholder="Year of Print">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <!-- ISBN Barcode Scanner -->
+        <div class="autocomplete-wrapper" style="display: flex; gap: 5px;">
+          <input type="text" id="isbn" data-col="11" data-autocomplete="true" placeholder="ISBN (Scan or Type)" onchange="fetchMetadataByISBN(this.value)">
+          <button type="button" class="btn-feature" title="Scan Barcode via Camera" onclick="openBarcodeScanner()">📷 Scan</button>
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="topic" data-col="12" data-autocomplete="true" placeholder="Topic">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <div class="autocomplete-wrapper">
+          <input type="text" id="subject" data-col="13" data-autocomplete="true" placeholder="Subject">
+          <div class="suggestions-box"></div>
+        </div>
+
+        <select id="condition" required>
+          <option value="" disabled selected>Select Condition...</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+
+        <div class="commentary-box">
+          <label><strong>Commentaries & Their Authors:</strong></label>
+          <div id="commentaryContainer" style="margin-top: 8px;"></div>
+          <button type="button" class="btn-add" onclick="addCommentaryRow()">+ Add Commentary & Author</button>
+        </div>
+      </div>
+      <br>
+      <button type="submit" id="submitBtn">Add Book to Library</button>
+      <button type="button" id="cancelBtn" onclick="resetForm()" style="background-color: #6c757d; display: none; margin-top: 5px;">Cancel Editing</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Book Catalogue</h2>
+    <div class="toolbar">
+      <input type="text" id="searchBox" onkeyup="searchBooks()" placeholder="🔍 Search by Title, Author, Subject, etc...">
+      <button type="button" class="btn-feature" onclick="exportToCSV()">📥 Export CSV</button>
+      <button type="button" class="btn-feature" onclick="window.print()">🖨️ Print / PDF</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <div id="loadingIndicator" class="loading-spinner">⏳ Fetching library records, please wait...</div>
+      <table id="booksTable" style="display:none;">
+        <thead>
+          <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- User Login Modal -->
+  <div id="loginModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 style="margin-bottom: 15px;">🔑 System Login</h2>
+      <form id="loginForm">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="user@library.org" required style="margin-bottom: 10px;">
+        
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required style="margin-bottom: 15px;">
+        
+        <button type="submit" style="background-color: #007bff; margin-bottom: 10px;">Sign In</button>
+        <button type="button" onclick="closeLoginModal()" style="background-color: #6c757d;">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add User Account Modal (Admin Only) -->
+  <div id="addUserModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 style="margin-bottom: 15px;">👤 Add User Account</h2>
+      <form id="addUserForm">
+        <label>Full Name</label>
+        <input type="text" id="newUserName" placeholder="Jane Doe" required style="margin-bottom: 10px;">
+
+        <label>Email Address</label>
+        <input type="email" id="newUserEmail" placeholder="jane@library.org" required style="margin-bottom: 10px;">
+        
+        <label>Password</label>
+        <input type="password" id="newUserPassword" placeholder="••••••••" required style="margin-bottom: 10px;">
+        
+        <label>Role</label>
+        <select id="newUserRole" style="margin-bottom: 15px;">
+          <option value="user">Standard User</option>
+          <option value="admin">Administrator</option>
+        </select>
+        
+        <button type="submit" style="background-color: #28a745; margin-bottom: 10px;">Create Account</button>
+        <button type="button" onclick="closeAddUserModal()" style="background-color: #6c757d;">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Camera Scanner Modal -->
+  <div id="scannerModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center;">
+      <h3 style="margin-top:0;">Position ISBN Barcode in View</h3>
+      
+      <div id="nativeVideoWrapper" style="display:none; width:100%; height:280px; background:#000;">
+        <video id="nativeVideo" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+      </div>
+      <div id="interactive" class="viewport" style="display:none; width:100%; height:280px; background:#000;"></div>
+
+      <div id="scannerStatus" style="margin-top: 10px; font-weight: bold; color: #007bff; font-size: 14px;">Initializing Camera...</div>
+      <br>
+      <button type="button" class="btn-remove" onclick="closeBarcodeScanner()">Close Scanner</button>
+    </div>
+  </div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydUNQacZxE91f6IC6vuQlZsVGGUj8-mFdwuzU2Hpw1CRjFq7DNWZT2hWyIelmYErxU/exec';
+  
+  let currentUser = JSON.parse(localStorage.getItem('lib_user')) || null;
+  let globalData = [];
+  let selectedIndex = -1;
+  let isSubmitting = false;
+
+  // Scanner Variables
+  let nativeStream = null;
+  let nativeScanInterval = null;
+
+  window.onload = function() {
+    addCommentaryRow();
+    updateUserSessionUI();
+    fetchBooks();
+    setupGlobalAutocomplete();
+  };
+
+  /* --- AUTHENTICATION & USER MANAGEMENT --- */
+  function updateUserSessionUI() {
+    const userInfo = document.getElementById('userInfo');
+    const authBtn = document.getElementById('authBtn');
+    const adminDashboardCard = document.getElementById('adminDashboardCard');
+
+    if (currentUser) {
+      userInfo.innerText = `${currentUser.name} (${currentUser.role.toUpperCase()})`;
+      authBtn.innerText = "🔒 Logout";
+      authBtn.className = "btn-logout";
+      authBtn.onclick = logoutUser;
+
+      if (currentUser.role === 'admin') {
+        adminDashboardCard.style.display = 'block';
+        fetchAdminLogs();
+      } else {
+        adminDashboardCard.style.display = 'none';
+      }
+    } else {
+      userInfo.innerText = "Not Logged In";
+      authBtn.innerText = "🔑 Login";
+      authBtn.className = "btn-admin";
+      authBtn.onclick = openLoginModal;
+      adminDashboardCard.style.display = 'none';
+    }
+  }
+
+  function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+  function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+  function openAddUserModal() { document.getElementById('addUserModal').style.display = 'flex'; }
+  function closeAddUserModal() { document.getElementById('addUserModal').style.display = 'none'; }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'login', email: email, password: password })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success) {
+        currentUser = res;
+        localStorage.setItem('lib_user', JSON.stringify(res));
+        alert("Login successful!");
+        closeLoginModal();
+        updateUserSessionUI();
+        fetchBooks();
+      } else {
+        alert("Error: " + res.message);
+      }
+    })
+    .catch(err => alert("Login error: " + err));
+  });
+
+  function logoutUser() {
+    currentUser = null;
+    localStorage.removeItem('lib_user');
+    alert("Logged out successfully.");
+    updateUserSessionUI();
+    resetForm();
+    fetchBooks();
+  }
+
+  /* --- ADMIN WORK PROGRESS TRACKING --- */
+  function fetchAdminLogs() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'getLogs', token: currentUser.token })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success && res.logs) {
+        const tbody = document.getElementById('logsTableBody');
+        let html = '';
+        const logs = res.logs;
+        document.getElementById('statTotalLogs').innerText = logs.length > 1 ? logs.length - 1 : 0;
+        
+        const uniqueUsers = new Set();
+        for (let i = logs.length - 1; i >= 1; i--) { // Reverse order (newest first)
+          uniqueUsers.add(logs[i][1]);
+          html += `<tr>
+            <td>${new Date(logs[i][0]).toLocaleString()}</td>
+            <td><strong>${logs[i][1]}</strong></td>
+            <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-size:12px;">${logs[i][2]}</span></td>
+            <td>${logs[i][3]}</td>
+          </tr>`;
+        }
+        tbody.innerHTML = html || '<tr><td colspan="4" style="text-align: center;">No activity logs found.</td></tr>';
+        document.getElementById('statActiveUsers').innerText = uniqueUsers.size;
+      }
+    });
+
+    // Register User Submission
+    document.getElementById('addUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const payload = {
+        action: 'addUser',
+        token: currentUser.token,
+        newUser: {
+          name: document.getElementById('newUserName').value,
+          email: document.getElementById('newUserEmail').value,
+          password: document.getElementById('newUserPassword').value,
+          role: document.getElementById('newUserRole').value
+        }
+      };
+
+      fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          alert('User account created!');
+          closeAddUserModal();
+          fetchAdminLogs();
+        } else {
+          alert('Error: ' + res.message);
+        }
+      });
+    });
+  }
+
+  /* --- CATALOGUE DATA OPERATIONS --- */
+  function fetchBooks() {
+    const loading = document.getElementById('loadingIndicator');
+    const table = document.getElementById('booksTable');
+    loading.style.display = 'block';
+    table.style.display = 'none';
+
+    fetch(SCRIPT_URL)
+      .then(res => res.json())
+      .then(data => {
+        globalData = data;
+        const head = document.getElementById('tableHead');
+        const body = document.getElementById('tableBody');
+
+        if (data && data.length > 0) {
+          document.getElementById('statTotalBooks').innerText = data.length - 1;
+          let headHtml = '';
+          data[0].forEach(col => { headHtml += '<th>' + col + '</th>'; });
+          if (currentUser && currentUser.role === 'admin') { headHtml += '<th>Actions</th>'; }
+          head.innerHTML = headHtml;
+
+          let bodyHtml = '';
+          for (let i = 1; i < data.length; i++) {
+            bodyHtml += '<tr>';
+            data[i].forEach(cell => {
+              bodyHtml += '<td>' + (cell !== undefined ? cell : '') + '</td>';
+            });
+
+            if (currentUser && currentUser.role === 'admin') {
+              bodyHtml += '<td>' +
+                '<button class="btn-edit" onclick="editBook(' + i + ')">Edit</button>' +
+                '<button class="btn-delete" onclick="deleteBook(' + (i + 1) + ')">Delete</button>' +
+              '</td>';
+            }
+            bodyHtml += '</tr>';
+          }
+          body.innerHTML = bodyHtml;
+        }
+
+        loading.style.display = 'none';
+        table.style.display = 'table';
+      })
+      .catch(err => {
+        loading.innerText = "⚠️ Failed to load catalog. Refresh page.";
+      });
+  }
+
+  document.getElementById('addBookForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!currentUser) {
+      alert("Please login first to submit or edit entries.");
+      openLoginModal();
+      return;
+    }
+    if (isSubmitting) return false;
+
+    const editRowIndex = document.getElementById('editRowIndex').value;
+    if (editRowIndex && currentUser.role !== 'admin') {
+      alert("Only administrators can edit existing entries.");
+      return;
+    }
+
+    isSubmitting = true;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerText;
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = editRowIndex ? "⏳ Updating..." : "⏳ Saving...";
+
+    const formData = {
+      slNo: document.getElementById('slNo').value,
+      title: document.getElementById('title').value,
+      titleEng: document.getElementById('titleEng').value,
+      subTitle: document.getElementById('subTitle').value,
+      author: document.getElementById('author').value,
+      editor: document.getElementById('editor').value,
+      commentariesLinked: getLinkedCommentaries(),
+      lang: document.getElementById('lang').value,
+      vol: document.getElementById('vol').value,
+      publisher: document.getElementById('publisher').value,
+      year: document.getElementById('year').value,
+      isbn: document.getElementById('isbn').value,
+      topic: document.getElementById('topic').value,
+      subject: document.getElementById('subject').value,
+      condition: document.getElementById('condition').value
+    };
+
+    const payload = {
+      action: editRowIndex ? "update" : "add",
+      token: currentUser.token,
+      rowIndex: editRowIndex ? parseInt(editRowIndex) + 1 : null,
+      data: formData
+    };
+
+    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success) {
+        alert(editRowIndex ? 'Book updated!' : 'Book added!');
+        resetForm();
+        fetchBooks();
+        if (currentUser.role === 'admin') fetchAdminLogs();
+      } else {
+        alert("Error: " + res.message);
+      }
+    })
+    .catch(err => alert("Submission failed: " + err))
+    .finally(() => {
+      isSubmitting = false;
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalText;
+    });
+  });
+
+  /* --- FORM HELPERS & COMMENTARIES --- */
+  function addCommentaryRow(name, author) {
+    name = name || ''; author = author || '';
+    const container = document.getElementById('commentaryContainer');
+    const div = document.createElement('div');
+    div.className = 'commentary-row';
+    div.innerHTML = '<input type="text" class="comm-name" placeholder="Commentary Title" value="' + name + '">' +
+                    '<input type="text" class="comm-author" placeholder="Author of Commentary" value="' + author + '">' +
+                    '<button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>';
+    container.appendChild(div);
+  }
+
+  function getLinkedCommentaries() {
+    const names = document.querySelectorAll('.comm-name');
+    const authors = document.querySelectorAll('.comm-author');
+    let result = [];
+    names.forEach((elem, idx) => {
+      const commName = elem.value.trim();
+      const commAuthor = authors[idx].value.trim();
+      if (commName || commAuthor) {
+        result.push((commName || 'Untitled') + ' (Author: ' + (commAuthor || 'Unknown') + ')');
+      }
+    });
+    return result.join(' | ');
+  }
+
+  function editBook(index) {
+    if (!currentUser || currentUser.role !== 'admin') { alert("Unauthorized."); return; }
+    const row = globalData[index];
+    document.getElementById('editRowIndex').value = index;
+    document.getElementById('slNo').value = row[0] || '';
+    populateFormFields(row);
+
+    document.getElementById('formTitle').innerText = 'Edit Book Information (Admin)';
+    document.getElementById('submitBtn').innerText = 'Update Book Info';
+    document.getElementById('cancelBtn').style.display = 'inline-block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function populateFormFields(row) {
+    document.getElementById('title').value = row[1] || '';
+    document.getElementById('titleEng').value = row[2] || '';
+    document.getElementById('subTitle').value = row[3] || '';
+    document.getElementById('author').value = row[4] || '';
+    document.getElementById('editor').value = row[5] || '';
+
+    document.getElementById('commentaryContainer').innerHTML = '';
+    const commString = row[6] || '';
+    if (commString) {
+      const pairs = commString.split(' | ');
+      pairs.forEach(pair => {
+        const match = pair.match(/(.*) \(Author: (.*)\)/);
+        if (match) { addCommentaryRow(match[1], match[2]); } 
+        else { addCommentaryRow(pair, ''); }
+      });
+    } else { addCommentaryRow(); }
+
+    document.getElementById('lang').value = row[7] || '';
+    document.getElementById('vol').value = row[8] || '';
+    document.getElementById('publisher').value = row[9] || '';
+    document.getElementById('year').value = row[10] || '';
+    document.getElementById('isbn').value = row[11] || '';
+    document.getElementById('topic').value = row[12] || '';
+    document.getElementById('subject').value = row[13] || '';
+    document.getElementById('condition').value = row[14] || '';
+  }
+
+  function resetForm() {
+    document.getElementById('addBookForm').reset();
+    document.getElementById('editRowIndex').value = '';
+    document.getElementById('slNo').value = '';
+    document.getElementById('commentaryContainer').innerHTML = '';
+    addCommentaryRow();
+    document.getElementById('formTitle').innerText = 'Add New Book Entry';
+    document.getElementById('submitBtn').innerText = 'Add Book to Library';
+    document.getElementById('cancelBtn').style.display = 'none';
+  }
+
+  function deleteBook(rowIndex) {
+    if (!currentUser || currentUser.role !== 'admin') { alert("Unauthorized."); return; }
+    if (confirm('Delete this book entry?')) {
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'delete', token: currentUser.token, rowIndex: rowIndex })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          alert('Book deleted!');
+          fetchBooks();
+          fetchAdminLogs();
+        } else {
+          alert('Error: ' + res.message);
+        }
+      });
+    }
+  }
+
+  function searchBooks() {
+    const input = document.getElementById('searchBox').value.toLowerCase();
+    const rows = document.getElementById('tableBody').getElementsByTagName('tr');
+    for (let i = 0; i < rows.length; i++) {
+      const text = rows[i].textContent.toLowerCase();
+      rows[i].style.display = text.includes(input) ? '' : 'none';
+    }
+  }
+
+  /* --- ISBN AUTO-LOOKUP & SCANNER ENGINE --- */
+  function fetchMetadataByISBN(isbnRaw) {
+    const isbn = isbnRaw.replace(/[^0-9X]/gi, '');
+    if (!isbn || (isbn.length !== 10 && isbn.length !== 13)) return;
+
+    fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`)
+      .then(res => res.json())
+      .then(data => {
+        const bookKey = `ISBN:${isbn}`;
+        if (data && data[bookKey]) {
+          const book = data[bookKey];
+          if (!document.getElementById('title').value) document.getElementById('title').value = book.title || '';
+          if (!document.getElementById('author').value && book.authors) {
+            document.getElementById('author').value = book.authors.map(a => a.name).join(', ');
+          }
+          if (!document.getElementById('publisher').value && book.publishers) {
+            document.getElementById('publisher').value = book.publishers.map(p => p.name).join(', ');
+          }
+          if (!document.getElementById('year').value && book.publish_date) {
+            document.getElementById('year').value = book.publish_date;
+          }
+        }
+      });
+  }
+
+  function openBarcodeScanner() {
+    document.getElementById('scannerModal').style.display = 'flex';
+    if ('BarcodeDetector' in window) { startNativeScanner(); } 
+    else { startStrictQuaggaScanner(); }
+  }
+
+  function handleSuccessfulScan(rawCode) {
+    const code = rawCode.trim();
+    if ((code.startsWith("978") || code.startsWith("979")) && code.length === 13) {
+      document.getElementById('isbn').value = code;
+      fetchMetadataByISBN(code);
+      closeBarcodeScanner();
+    } else if (code.length === 10) {
+      document.getElementById('isbn').value = code;
+      fetchMetadataByISBN(code);
+      closeBarcodeScanner();
+    }
+  }
+
+  async function startNativeScanner() {
+    document.getElementById('nativeVideoWrapper').style.display = 'block';
+    document.getElementById('interactive').style.display = 'none';
+    const video = document.getElementById('nativeVideo');
+
+    try {
+      nativeStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      video.srcObject = nativeStream;
+      const barcodeDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8'] });
+
+      nativeScanInterval = setInterval(async () => {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          try {
+            const barcodes = await barcodeDetector.detect(video);
+            if (barcodes.length > 0) handleSuccessfulScan(barcodes[0].rawValue);
+          } catch (e) { console.error(e); }
+        }
+      }, 200);
+    } catch (err) { startStrictQuaggaScanner(); }
+  }
+
+  function startStrictQuaggaScanner() {
+    document.getElementById('nativeVideoWrapper').style.display = 'none';
+    document.getElementById('interactive').style.display = 'block';
+
+    Quagga.init({
+      inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#interactive'), constraints: { facingMode: "environment" } },
+      decoder: { readers: ["ean_reader"], multiple: false }
+    }, function(err) {
+      if (err) { closeBarcodeScanner(); return; }
+      Quagga.start();
+    });
+
+    let lastCode = ""; let matchCount = 0;
+    Quagga.onDetected(function(result) {
+      if (result && result.codeResult && result.codeResult.code) {
+        const code = result.codeResult.code;
+        if ((code.startsWith("978") || code.startsWith("979")) && code.length === 13) {
+          if (code === lastCode) matchCount++; else { lastCode = code; matchCount = 1; }
+          if (matchCount >= 3) handleSuccessfulScan(code);
+        }
+      }
+    });
+  }
+
+  function closeBarcodeScanner() {
+    if (nativeScanInterval) clearInterval(nativeScanInterval);
+    if (nativeStream) { nativeStream.getTracks().forEach(track => track.stop()); nativeStream = null; }
+    try { Quagga.stop(); } catch(e){}
+    document.getElementById('scannerModal').style.display = 'none';
+  }
+
+  /* --- EXPORT CSV --- */
+  function exportToCSV() {
+    if (!globalData || globalData.length === 0) return alert("No data to export.");
+    let csvContent = "data:text/csv;charset=utf-8,";
+    globalData.forEach(row => {
+      const escapedRow = row.map(cell => `"${(cell !== undefined ? cell : '').toString().replace(/"/g, '""')}"`);
+      csvContent += escapedRow.join(",") + "\r\n";
+    });
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `Library_Catalog_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  /* --- AUTOCOMPLETE ENGINE --- */
+  function setupGlobalAutocomplete() {
+    document.querySelectorAll('input[data-autocomplete="true"]').forEach(input => {
+      input.addEventListener('input', function() { handleFieldInput(this); });
+      input.addEventListener('keydown', function(e) { handleFieldKeyDown(e, this); });
+    });
+  }
+
+  function handleFieldInput(inputElem) {
+    const wrapper = inputElem.closest('.autocomplete-wrapper');
+    const box = wrapper.querySelector('.suggestions-box');
+    const query = inputElem.value.trim().toLowerCase();
+    const targetCol = parseInt(inputElem.dataset.col);
+    closeAllSuggestions();
+
+    if (!query || !globalData || globalData.length <= 1) return;
+
+    const matches = new Set();
+    for (let i = 1; i < globalData.length; i++) {
+      const fieldValue = String(globalData[i][targetCol] || '').trim();
+      if (fieldValue && fieldValue.toLowerCase().includes(query)) {
+        matches.add(fieldValue);
+        if (matches.size >= 8) break;
+      }
+    }
+
+    if (matches.size === 0) return;
+
+    box.innerHTML = '';
+    matches.forEach(value => {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.innerHTML = `<strong>${value}</strong>`;
+      item.onmousedown = function(e) {
+        e.preventDefault();
+        inputElem.value = value;
+        closeAllSuggestions();
+      };
+      box.appendChild(item);
+    });
+    box.style.display = 'block';
+  }
+
+  function handleFieldKeyDown(e, inputElem) {
+    const wrapper = inputElem.closest('.autocomplete-wrapper');
+    const box = wrapper.querySelector('.suggestions-box');
+    const items = box.querySelectorAll('.suggestion-item');
+
+    if (box.style.display === 'none' || items.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault(); selectedIndex = (selectedIndex + 1) % items.length; updateActiveItem(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault(); selectedIndex = (selectedIndex - 1 + items.length) % items.length; updateActiveItem(items);
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault(); inputElem.value = items[selectedIndex].dataset.value; closeAllSuggestions();
+    } else if (e.key === 'Escape') { closeAllSuggestions(); }
+  }
+
+  function updateActiveItem(items) {
+    items.forEach((item, idx) => {
+      item.classList.toggle('active', idx === selectedIndex);
+      if (idx === selectedIndex) item.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function closeAllSuggestions() {
+    document.querySelectorAll('.suggestions-box').forEach(box => { box.style.display = 'none'; });
+    selectedIndex = -1;
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.autocomplete-wrapper')) closeAllSuggestions();
+  });
+</script>
+</body>
+</html>
+Key Features Added
+User Authentication & Session Storage:
+
+Login system using standard user accounts or administrator accounts.
+
+Session tokens are stored in localStorage to keep users logged in.
+
+Admin Work Progress & Activity Tracker:
+
+Automatically creates an ActivityLogs tab inside your connected Google Spreadsheet.
+
+Tracks user logins, book additions, edits, and deletions with precise timestamps.
+
+Admins can view activity logs directly from the dashboard to track individual user performance and progress.
+
+User Creation:
+
+Admins can add new team members/users via the built-in user creation modal directly in the frontend interface.
+
+do it saves progres report so that i can see monthly or weekly report
+
+Whether your progress is saved automatically for weekly or monthly viewing depends entirely on the app or platform you are using.
+
+Here is where progress reports are usually stored across common tools:
+
+Gemini & AI Chats: Standard chat history does not generate automatic weekly or monthly progress reports on its own. However, you can ask Gemini to summarize your previous inputs or track a ongoing plan within a conversation thread.
+
+Project Management Tools (Jira, Asana, Trello): Progress is saved automatically. You can view weekly or monthly summaries by going to the Dashboards, Reports, or Insights tab.
+
+Google Sheets / Excel: If you log your progress daily, data is saved, but you need to set up a pivot table, chart, or dashboard tab to group those daily entries into weekly or monthly views.
+
+Fitness & Learning Apps (Duolingo, Strava, FitBit): Progress is stored continuously. You can view weekly streaks or monthly summaries under your Profile, Stats, or Activity tab.
+
+Which specific app, program, or goal are you trying to track progress for? Let me know so I can give you exact steps to view or set up your reports!
+
+
+
+
+Gemini is AI and can make mistakes.
+
+Bringing in Personal Intelligence
