@@ -2375,7 +2375,6 @@ HTML
     document.getElementById('submitBtn').innerText = 'Add Book to Library';
     document.getElementById('cancelBtn').style.display = 'none';
   }
-
   function deleteBook(rowIndex) {
     if (!currentUser || currentUser.role !== 'admin') { alert("Unauthorized."); return; }
     if (confirm('Delete this book entry?')) {
@@ -2395,7 +2394,6 @@ HTML
       });
     }
   }
-
   function searchBooks() {
     const input = document.getElementById('searchBox').value.toLowerCase();
     const rows = document.getElementById('tableBody').getElementsByTagName('tr');
@@ -2596,44 +2594,3 @@ HTML
 </script>
 </body>
 </html>
-Key Features Added
-User Authentication & Session Storage:
-
-Login system using standard user accounts or administrator accounts.
-
-Session tokens are stored in localStorage to keep users logged in.
-
-Admin Work Progress & Activity Tracker:
-
-Automatically creates an ActivityLogs tab inside your connected Google Spreadsheet.
-
-Tracks user logins, book additions, edits, and deletions with precise timestamps.
-
-Admins can view activity logs directly from the dashboard to track individual user performance and progress.
-
-User Creation:
-
-Admins can add new team members/users via the built-in user creation modal directly in the frontend interface.
-
-do it saves progres report so that i can see monthly or weekly report
-
-Whether your progress is saved automatically for weekly or monthly viewing depends entirely on the app or platform you are using.
-
-Here is where progress reports are usually stored across common tools:
-
-Gemini & AI Chats: Standard chat history does not generate automatic weekly or monthly progress reports on its own. However, you can ask Gemini to summarize your previous inputs or track a ongoing plan within a conversation thread.
-
-Project Management Tools (Jira, Asana, Trello): Progress is saved automatically. You can view weekly or monthly summaries by going to the Dashboards, Reports, or Insights tab.
-
-Google Sheets / Excel: If you log your progress daily, data is saved, but you need to set up a pivot table, chart, or dashboard tab to group those daily entries into weekly or monthly views.
-
-Fitness & Learning Apps (Duolingo, Strava, FitBit): Progress is stored continuously. You can view weekly streaks or monthly summaries under your Profile, Stats, or Activity tab.
-
-Which specific app, program, or goal are you trying to track progress for? Let me know so I can give you exact steps to view or set up your reports!
-
-
-
-
-Gemini is AI and can make mistakes.
-
-Bringing in Personal Intelligence
