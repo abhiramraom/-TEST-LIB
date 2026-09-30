@@ -463,17 +463,10 @@
       <button type="button" class="btn-remove" onclick="closeBarcodeScanner()">Close Scanner</button>
 
     </div>
-
   </div>
-
-
-
 <script>
 
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0KIegShqsQuyI6IzGdt8QPwLTEI9xFk3m2UiNUUSu3SNlXsKvIsmLZVGWU1HuGaMDzg/exec';
-
-  
-
   let adminToken = null;
 
   let globalData = [];
@@ -481,9 +474,6 @@
   let selectedIndex = -1;
 
   let isSubmitting = false;
-
-
-
   // Scanner Variables
 
   let nativeStream = null;
@@ -623,21 +613,11 @@
     return result.join(' | ');
 
   }
-
-
-
   function fetchBooks() {
-
     const loading = document.getElementById('loadingIndicator');
-
     const table = document.getElementById('booksTable');
-
     loading.style.display = 'block';
-
     table.style.display = 'none';
-
-
-
     fetch(SCRIPT_URL)
 
       .then(res => res.json())
